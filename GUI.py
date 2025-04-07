@@ -3,7 +3,6 @@ import pokebase as pb
 from PIL import Image, ImageTk
 from data import GetData
 import requests
-from io import BytesIO
 import os
 
 CLR = 'lightyellow'
