@@ -1,10 +1,3 @@
-from data import GetData
-
 from GUI import GraphicInterface
-
+#calling function where main logic is implemented
 gui = GraphicInterface()
-
-#gui.add_pokemon()
-
-# data = GetData()
-# data.fetch_data()

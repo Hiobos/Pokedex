@@ -15,28 +15,51 @@ class GraphicInterface:
         self.window = Tk()
         self.window.title('Pokedex')
         self.window.config(bg=CLR)
-        self.window.minsize(500, 500)
-        self.popup_generation()
-        #Setting range of Pokemon from API and fetching data
+        self.window.minsize(500, 600)
+        self.canvas = Canvas(self.window, width=500, height=500, bg=CLR)
+
+        #flags
+        self.after = None
+        self.loading = False
+
+        #Fetching list of pokemon names from API
         self.pokemon_list = pokemon_data.fetch_data()
 
         #defining empty variables
         self.images, self.column, self.row = [], 0, 0
+
+        def reset_canvas():
+            self.loading = False
+            self.canvas.delete('all')
+            self.images.clear()
+            self.column, self.row = 0, 0
+            self.inner_frame = Frame(self.canvas, bg=CLR)
+            self.canvas.create_window((0, 0), window=self.inner_frame, anchor='nw')
+
+        #reset
+        reset_btn = Button(text='reset', command=reset_canvas)
+        reset_btn.grid(row=0, column=0)
+
+        generation = Button(text='Generation', command=self.popup_generation)
+        generation.grid(row=0, column=1)
+
         #canvas, frame, scrollbar
-        self.canvas = Canvas(self.window, width=500, height=500, bg=CLR)
-        self.canvas.grid(row=0, column=0)
+        self.canvas.grid(row=1, column=0, columnspan=2)
         self.inner_frame = Frame(self.canvas, bg=CLR)
         self.canvas.create_window((0, 0), window=self.inner_frame, anchor='nw')
         self.scrollbar = Scrollbar(self.window, orient=VERTICAL, command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
-        self.scrollbar.grid(row=0, column=1, sticky='ns')
+        self.scrollbar.grid(row=1, column=3, sticky='ns')
 
         self.window.mainloop()
 
+    #start popup
     def popup_generation(self):
         win = Toplevel(bg=CLR)
         win.wm_title("Choose generation")
         win.minsize(300, 60)
+        self.loading = True
+
         GENERATIONS = {
             'Kanto': (1, 151),  # Gen 1
             'Johto': (152, 251),  # Gen 2
@@ -67,6 +90,8 @@ class GraphicInterface:
         submit = Button(win, text="proceed", command=lambda: submit_action(), width=40, bg=CLR)
         submit.grid(row=1, column=0, columnspan=2, pady=5, padx=5, sticky=NSEW)
     def add_pokemon(self, index_start, index_end):
+        if not self.loading:
+            return
 
         if index_start >= index_end:
             return 0

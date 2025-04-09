@@ -20,7 +20,6 @@ class GetData:
         for i in range(0, len(list_test)):
             self.pokemon_list.append(list_test[i]['name'])
 
-        #print(self.pokemon_list)
         return self.pokemon_list
 
 
