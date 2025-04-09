@@ -16,14 +16,9 @@ class GraphicInterface:
         self.window.title('Pokedex')
         self.window.config(bg=CLR)
         self.window.minsize(500, 500)
-
+        self.popup_generation()
         #Setting range of Pokemon from API and fetching data
-        self.offset, self.limit = 0, 151
-        param = {
-            'offset': self.offset,
-            'limit': self.limit
-        }
-        self.pokemon_list = pokemon_data.fetch_data(param)
+        self.pokemon_list = pokemon_data.fetch_data()
 
         #defining empty variables
         self.images, self.column, self.row = [], 0, 0
@@ -35,17 +30,50 @@ class GraphicInterface:
         self.scrollbar = Scrollbar(self.window, orient=VERTICAL, command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
         self.scrollbar.grid(row=0, column=1, sticky='ns')
-        self.add_pokemon(0)
+
         self.window.mainloop()
 
-    def add_pokemon(self, i=0):
+    def popup_generation(self):
+        win = Toplevel(bg=CLR)
+        win.wm_title("Choose generation")
+        win.minsize(300, 60)
+        GENERATIONS = {
+            'Kanto': (1, 151),  # Gen 1
+            'Johto': (152, 251),  # Gen 2
+            'Hoenn': (252, 386),  # Gen 3
+            'Sinnoh': (387, 493),  # Gen 4
+            'Unova': (494, 649),  # Gen 5
+            'Kalos': (650, 721),  # Gen 6
+            'Alola': (722, 809),  # Gen 7
+            'Galar': (810, 905),  # Gen 8
+            'Paldea': (906, 1025),  # Gen 9 (Scarlet/Violet)
+        }
 
-        if i >= len(self.pokemon_list):
+        offset = Label(win, text="Generation: ", bg=CLR)
+        offset.grid(row=0, column=0, pady=5, padx=5)
+
+        variable = StringVar(win)
+        variable.set(["Select Generation"])  # default value
+
+        menu = OptionMenu(win, variable, *GENERATIONS)
+        menu.grid(row=0, column=1, pady=5, padx=5, sticky=NSEW)
+
+        def submit_action():
+            gen_name = variable.get()
+            start, end = GENERATIONS[gen_name]
+            self.add_pokemon(start - 1, end)
+            win.destroy()
+
+        submit = Button(win, text="proceed", command=lambda: submit_action(), width=40, bg=CLR)
+        submit.grid(row=1, column=0, columnspan=2, pady=5, padx=5, sticky=NSEW)
+    def add_pokemon(self, index_start, index_end):
+
+        if index_start >= index_end:
             return 0
-        print(f"i: {i}, len(poke_list): {len(self.pokemon_list)}")
+        print(f"i: {index_start}, len(poke_list): {len(self.pokemon_list)}")
 
         #Getting list of Pokemon and their sprites in a loop
-        pokemon = pb.pokemon(self.pokemon_list[i])
+        pokemon = pb.pokemon(self.pokemon_list[index_start])
         sprite = pb.SpriteResource('pokemon', pokemon.id)
         sprite_url = sprite.url
         #getting photo to PhotoImage
@@ -64,10 +92,10 @@ class GraphicInterface:
         pokemon_img = Label(frame, image=photo, bg=CLR)
         pokemon_img.grid(row=0, column=self.column)
         #Pokedex index
-        pokemon_name = Label(frame, text=f"#{i + 1}", bg=CLR)
+        pokemon_name = Label(frame, text=f"#{index_start + 1}", bg=CLR)
         pokemon_name.grid(row=1, column=self.column)
         #pokemon name
-        pokemon_name = Label(frame, text=self.pokemon_list[i].capitalize(), bg=CLR)
+        pokemon_name = Label(frame, text=self.pokemon_list[index_start].capitalize(), bg=CLR)
         pokemon_name.grid(row=2, column=self.column)
         #Pokemon type
         pokemon_type = Label(frame, text=pokemon.types[0].type.name, bg=CLR)
@@ -85,4 +113,4 @@ class GraphicInterface:
         self.inner_frame.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
-        self.window.after(40, lambda: self.add_pokemon(i + 1))
+        self.window.after(40, lambda: self.add_pokemon(index_start + 1, index_end))

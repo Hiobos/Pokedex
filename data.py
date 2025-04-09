@@ -3,12 +3,16 @@ import requests
 
 API_URL = 'https://pokeapi.co/api/v2/pokemon/'
 
+param = {
+            'offset': 0,
+            'limit': 1302
+        }
 
 class GetData:
     def __init__(self):
         self.pokemon_list = []
 
-    def fetch_data(self, param):
+    def fetch_data(self):
         response = requests.get(API_URL, params=param)
         response = response.json()
         list_of_pokemon = response['results']
