@@ -76,16 +76,19 @@ class GraphicInterface:
         offset.grid(row=0, column=0, pady=5, padx=5)
 
         variable = StringVar(win)
-        variable.set(["Select Generation"])  # default value
+        variable.set("Select Generation")  # default value
 
         menu = OptionMenu(win, variable, *GENERATIONS)
         menu.grid(row=0, column=1, pady=5, padx=5, sticky=NSEW)
 
         def submit_action():
-            gen_name = variable.get()
-            start, end = GENERATIONS[gen_name]
-            self.add_pokemon(start - 1, end)
-            win.destroy()
+            try:
+                gen_name = variable.get()
+                start, end = GENERATIONS[gen_name]
+                self.add_pokemon(start - 1, end)
+                win.destroy()
+            except KeyError:
+                print('Choose generation from list!')
 
         submit = Button(win, text="proceed", command=lambda: submit_action(), width=40, bg=CLR)
         submit.grid(row=1, column=0, columnspan=2, pady=5, padx=5, sticky=NSEW)
